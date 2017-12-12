@@ -1,0 +1,21 @@
+{
+  "name": "ecommerceapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "William Lindell",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "*",
+    "ejs": "*",
+    "express": "*",
+    "express-mysql-session": "^1.2.3",
+    "express-session": "*",
+    "express-validator": "*",
+    "faker": "^4.1.0",
+    "mysql": "*"
+  }
+}
