@@ -46,7 +46,7 @@ app.use(expressValidator({
     formParam = root;
 
     while(namespace.length) {
-      formParam += '[' + namespace.shift() + ']';
+     formParam += '[' + namespace.shift() + ']';
     }
     return {
       param : formParam,
@@ -208,7 +208,7 @@ app.post('/register', (req, res) => {
 
     var sql = "INSERT INTO Users (user_email, user_password, isAdmin) VALUES ?";
     var value = [
-      [req.body.user_email_, req.body.password_, false]
+      [req.body.user_email_, req.body.password_, true]
     ];
     db.query(sql,[value], function(err,result) {
 
@@ -294,7 +294,9 @@ app.post('/add-product', (req, res) => {
 });
 
 app.post('/cart', (req, res) => {
-
+	if(req.session.user == undefined){
+	res.redirect('/login');
+}
   console.log('nothing in chechout happened');
   res.redirect('/')
 
