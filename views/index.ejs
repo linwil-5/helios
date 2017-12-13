@@ -15,7 +15,7 @@
 		<div class="container">
 			<ul>
 				<li><a href="home">Home</a></li>
-				<li><a href="cart">Cart</a></li>
+				<li><a href="cart">Cart(<%= qty %>)</a></li>
 
 				<%if (!isUserValid) { %>
 					<li><a href="login">Login</a></li>
@@ -46,13 +46,14 @@
 													<p>
 														Price: <%= products[i].product_price %> $
 														<a href="add-tocart/<%= products[i].product_name %>">Buy</a>
+														<a href="comments/<%= products[i].product_name %>">Comments</a>
+
 													</p>
 											</div>
 									</div>
 							</div>
 					<% } %>
 			</div>
-
 		</div>
 	</section>
 

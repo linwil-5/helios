@@ -1,1 +1,46 @@
-this is the cart
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+  </head>
+  <body>
+
+    <header id="main-header">
+      <div class="container">
+        <h1>Cart</h1>
+      </div>
+    </header>
+
+    <section id="showcase">
+      <div class="container">
+        <div class="row">
+
+            <% for (var i = 0; i < products.length; i++) { %>
+                <div class="col-md-4">
+                    <div class="thumbnail">
+                        <img src="<%= products[i].cover %>">
+                        <div class="caption">
+                            <h3>Name: <%= products[i].item.product_name %></h3>
+                            <h3>Quantity: <%= products[i].qty %>
+                                <a href="delete-onefromcart/<%= products[i].item.product_name %>">Delete one</a>
+                            </h3>
+
+                            <p>
+                              Price: <%= products[i].item.product_price %> $
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+            <h2>Total Price: <%= totalPrice %></h2>
+              <form method="POST" action"/cart/checkout">
+                <input type="submit" value="Checkout">
+              </form>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

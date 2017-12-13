@@ -6,6 +6,7 @@ const session = require('express-session');
 const expressValidator = require('express-validator');
 const MySQLStore = require('express-mysql-session')(session);
 const faker = require('faker');
+const Cart = require('./models/cart.js');
 
 // Create connection
 const db = mysql.createConnection({
@@ -75,14 +76,18 @@ app.get('/', (req, res) => {
     function(err, rows) {
     if (err) throw err;
 
-  if(req.session.user == undefined){
+    var cart = new Cart(req.session.cart ? req.session.cart : {});
+    req.session.cart = cart;
+
+    if(req.session.user == undefined){
     res.render('index', {
       title: 'Not logged in',
       success: req.session.success,
       errors: req.session.errors,
       isUserValid: false,
       products: rows,
-      nameShown: ''
+      nameShown: '',
+      qty: req.session.cart.totalQty
     });
   }
   else{
@@ -92,11 +97,35 @@ app.get('/', (req, res) => {
       errors: req.session.errors,
       isUserValid: true,
       products: rows,
-      nameShown: req.session.user.user_email
+      nameShown: req.session.user.user_email,
+      qty: req.session.cart.totalQty
     });
   }
 });
 });
+
+app.get('/cart',(req, res) => {
+  var cart = new Cart(req.session.cart);
+//  var products1 = cart.generateArray();
+
+//  console.log(cart.items);
+//  console.log(products1);
+//  console.log(products[1].item.product_name);
+//  console.log(products.length);
+
+  res.render('cart', {
+  title: 'My Cart',
+  products: cart.generateArray(),
+  totalPrice: cart.totalPrice
+  });
+});
+app.get('comments:id'), (req, res) => {
+  var name_product = req.params.id;
+  console.log(name_product);
+
+
+}
+
 
 app.get('/edit-User', (req, res) => {
   res.render('main/edit-User');
@@ -104,9 +133,6 @@ app.get('/edit-User', (req, res) => {
 
 app.get('/home',(req, res) => {
   res.redirect('/');
-});
-app.get('/cart',(req, res) => {
-  res.render('cart');
 });
 app.get('/login',(req, res) => {
   res.render('login');
@@ -140,10 +166,25 @@ app.get('/logout', (req, res) => {
 //  return res.status(200);
   res.redirect('/');
 });
-
+// might need to be change to search for product id instead of name
 app.get('/add-tocart/:id', (req, res) => {
   var name_product = req.params.id;
   console.log(name_product);
+  var cart = new Cart(req.session.cart ? req.session.cart : {});
+
+  db.query("SELECT * FROM Products WHERE (product_name) = ?",[name_product],
+  function(err, rows){
+    if(err) throw err;
+
+
+    rows.forEach(function(result){
+
+    cart.add(result, result.product_id);
+    req.session.cart = cart;
+    console.log(req.session.cart);
+    res.redirect('/');
+    });
+  });
 });
 
 
@@ -173,7 +214,27 @@ app.post('/register', (req, res) => {
 
       if(err) throw err;
       console.log("inserted rows: " + result.affectedRows);
+
   });
+
+
+  db.query("SELECT user_id FROM Users ORDER BY user_id DESC LIMIT 1",
+  function(err, result){
+    if(err) throw err;
+
+    console.log(Object.values(result[0]));
+
+//    rows.forEach(function(result){
+      var value = [
+        Object.values(result[0])
+      ];
+      var sql = "INSERT INTO Orders (customer_id) VALUES ?";
+      db.query(sql,[value], function(err, result) {
+      if(err) throw err;
+    });
+
+  });
+
   req.session.success = true;
   res.redirect('/');
   }
@@ -194,6 +255,7 @@ app.post('/login', (req, res) => {
       //console.log(result.user_email);
       if(result.user_email == useremail && result.user_password == password){
         req.session.user = result;
+
       }
       //Check user and password befoe session
       //console.log(req.session.user.user_email, req.session.user.user_password);
@@ -230,6 +292,17 @@ app.post('/add-product', (req, res) => {
   res.redirect('/');
   }
 });
+
+app.post('/cart', (req, res) => {
+
+  console.log('nothing in chechout happened');
+  res.redirect('/')
+
+});
+
+
+
+
 
 
 
