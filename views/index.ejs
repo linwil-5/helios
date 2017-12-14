@@ -29,7 +29,7 @@
 					<li><a href="add-product">Add product</a></li>
 					<li><a href="edit-User">Edit User</a></li>
 				<% } %>
-
+				<li><a href="empty">Empty Cart</a></li>
 			</ul>
 		</div>
 	</nav>
@@ -45,7 +45,10 @@
 													<h3><%= products[i].product_name %></h3>
 													<p>
 														Price: <%= products[i].product_price %> $
+														Stock: <%= products[i].product_stock %> $
+														<%if (products[i].product_stock > 0) { %>
 														<a href="add-tocart/<%= products[i].product_name %>">Buy</a>
+														<% } %>
 														<a href="comments/<%= products[i].product_name %>">Comments</a>
 
 													</p>

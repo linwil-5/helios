@@ -160,12 +160,32 @@ app.get('/add-product',(req, res) => {
 });
 
 app.get('/logout', (req, res) => {
+  var cart = new Cart(req.session.cart);
+
   if(req.session.user != undefined){
     req.session.destroy();
   };
 //  return res.status(200);
   res.redirect('/');
 });
+
+app.get('/empty', (req, res) => {
+
+  var cart = new Cart(req.session.cart);
+  products = cart.generateArray();
+
+  for (var i = 0; i < products.length; i++) {
+    var quant = products[i].qty;
+    var id = products[i].item.product_id;
+
+    db.query("UPDATE Products SET product_stock = product_stock + ? WHERE (product_id) = ?", [quant, id]);
+  }
+  req.session.cart = {};
+  res.redirect('/');
+
+
+});
+
 // might need to be change to search for product id instead of name
 app.get('/add-tocart/:id', (req, res) => {
   var name_product = req.params.id;
@@ -179,10 +199,12 @@ app.get('/add-tocart/:id', (req, res) => {
 
     rows.forEach(function(result){
 
-    cart.add(result, result.product_id);
-    req.session.cart = cart;
-    console.log(req.session.cart);
-    res.redirect('/');
+      db.query("UPDATE Products SET product_stock = product_stock -1 WHERE (product_id) = ?", [result.product_id]);
+      cart.add(result, result.product_id);
+      req.session.cart = cart;
+      console.log(req.session.cart);
+      res.redirect('/');
+
     });
   });
 });
@@ -294,12 +316,40 @@ app.post('/add-product', (req, res) => {
 });
 
 app.post('/cart', (req, res) => {
+
 	if(req.session.user == undefined){
 	res.redirect('/login');
-}
-  console.log('nothing in chechout happened');
-  res.redirect('/')
+  }
+  else{
+    db.query("SELECT order_id FROM Orders WHERE (customer_id) = ?",[req.session.user.user_id],
+      function(err, result) {
+      if (err) throw err;
 
+      var cart = new Cart(req.session.cart);
+
+      products = cart.generateArray();
+
+
+      for (var i = 0; i < products.length; i++) {
+        var count = products[i].qty;
+        var orderID = Object.values(result[0]);
+        var prodID = products[i].item.product_id;
+        var prodPrice = products[i].item.product_price;
+
+        var sql = "INSERT INTO ShoppingBasket (order_id, product_count, product_id, product_price) VALUES ?";
+        var value = [
+          [orderID[0], count, prodID, prodPrice]
+        ];
+
+        db.query(sql,[value]);
+        db.query("UPDATE Products SET product_stock = product_stock - ? WHERE (product_id) = ?", [count, prodID]);
+        console.log(value);
+
+
+      }
+    });
+    res.redirect('/empty');
+  }
 });
 
 
