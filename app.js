@@ -209,7 +209,22 @@ app.get('/add-tocart/:id', (req, res) => {
   });
 });
 
+app.get('/edit/:id', (req, res) => {
 
+  var name = req.params.id;
+
+  db.query("SELECT * FROM Products WHERE product_name = ?", [name],
+  function(err, result){
+
+    console.log(result[0]);
+
+    res.render('edit-product',{
+
+      product: result,
+
+    });
+  });
+});
 
 
   // post to mysql databade
@@ -354,6 +369,22 @@ app.post('/cart', (req, res) => {
     res.redirect('/empty');
   }
 
+});
+
+app.post('/edit/:id', (req, res) => {
+
+  var name = req.params.id;
+
+  db.query("SELECT * FROM Products WHERE product_name = ?", [name],
+  function(err, result){
+
+    var productID = result[0].product_id;
+    console.log("heelooo");
+    db.query("UPDATE Products SET product_name = ?, product_price = ?,product_desc = ?,product_stock = ? WHERE (product_id) = ?",
+    [req.body.productName, req.body.productPrice, req.body.productDesc, req.body.productStock,productID]);
+
+  });
+  res.redirect('/');
 });
 
 
