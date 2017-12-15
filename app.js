@@ -362,10 +362,10 @@ app.post('/cart', (req, res) => {
 
 
         console.log(req.session.user.user_id);
-        db.query("INSERT INTO Orders (customer_id) VALUES (?)", [req.session.user.user_id]);
 
       }
     });
+    db.query("INSERT INTO Orders (customer_id) VALUES (?)", [req.session.user.user_id]);
     res.redirect('/empty');
   }
 
