@@ -63,83 +63,84 @@ app.use(session({
   saveUninitialized: false
 }));
 
-
+// Render the home page
 app.get('/', (req, res) => {
 
-  console.log('-------Information --------')
-  console.log(req.sessionID);
-  console.log(req.session.user);
-  console.log('-------Information --------')
+  console.log("SessionId = " +req.sessionID + " UserInf = " +req.session.user);
+//  console.log(req.session.user);
   req.session.errors = null;
   req.session.success = null;
   db.query("SELECT * FROM Products",
-    function(err, rows) {
-    if (err) throw err;
+    function(err, rows) { if (err) throw err;
 
-    var cart = new Cart(req.session.cart ? req.session.cart : {});
-    req.session.cart = cart;
+      //Create new or existing session
+      var cart = new Cart(req.session.cart ? req.session.cart : {});
+      req.session.cart = cart;
 
-    if(req.session.user == undefined){
-    res.render('index', {
-      title: 'Not logged in',
-      success: req.session.success,
-      errors: req.session.errors,
-      isUserValid: false,
-      products: rows,
-      nameShown: '',
-      qty: req.session.cart.totalQty
+      if(req.session.user == undefined){
+        res.render('index', {
+          title: 'Not logged in',
+          success: req.session.success,
+          errors: req.session.errors,
+          isUserValid: false,
+          products: rows,
+          nameShown: '',
+          qty: req.session.cart.totalQty
+        });
+      }
+      else{
+        res.render('index', {
+          title: 'Welcome Customer!',
+          success: req.session.success,
+          errors: req.session.errors,
+          isUserValid: true,
+          products: rows,
+          nameShown: req.session.user.user_email,
+          qty: req.session.cart.totalQty
+        });
+      }
     });
-  }
-  else{
-    res.render('index', {
-      title: 'Welcome Customer!',
-      success: req.session.success,
-      errors: req.session.errors,
-      isUserValid: true,
-      products: rows,
-      nameShown: req.session.user.user_email,
-      qty: req.session.cart.totalQty
-    });
-  }
-});
 });
 
+// Render the cart page with the session
 app.get('/cart',(req, res) => {
+
+  // Fetch and create at already existing cart
   var cart = new Cart(req.session.cart);
-//  var products1 = cart.generateArray();
-
-//  console.log(cart.items);
-//  console.log(products1);
-//  console.log(products[1].item.product_name);
-//  console.log(products.length);
-
   res.render('cart', {
-  title: 'My Cart',
-  products: cart.generateArray(),
-  totalPrice: cart.totalPrice
+    title: 'My Cart',
+    products: cart.generateArray(),
+    totalPrice: cart.totalPrice
   });
 });
-app.get('comments:id'), (req, res) => {
+
+// Render the commentpage with the selected product
+app.get('comments:id', (req, res) => {
   var name_product = req.params.id;
   console.log(name_product);
+});
 
-
-}
-
-
+// Render admin's edit user page
 app.get('/edit-User', (req, res) => {
   res.render('main/edit-User');
 });
 
+// Redirect to homepage
 app.get('/home',(req, res) => {
   res.redirect('/');
 });
+
+// Render the page for user to login
 app.get('/login',(req, res) => {
   res.render('login');
 });
+
+// Render the page for new user to register
 app.get('/register',(req, res) => {
   res.render('register');
 });
+
+// Render the page for admin to a a new product? Code possible bad
 app.get('/add-product',(req, res) => {
 
   db.query("SELECT * FROM Users WHERE (user_email) = ?",[req.session.user.user_email],
@@ -159,6 +160,7 @@ app.get('/add-product',(req, res) => {
   });
 });
 
+// Used for redirecting to homepage after user logout
 app.get('/logout', (req, res) => {
   var cart = new Cart(req.session.cart);
 
@@ -169,6 +171,7 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+// Used for empty user's cart
 app.get('/empty', (req, res) => {
 
   var cart = new Cart(req.session.cart);
@@ -178,37 +181,35 @@ app.get('/empty', (req, res) => {
     var quant = products[i].qty;
     var id = products[i].item.product_id;
 
-    db.query("UPDATE Products SET product_stock = product_stock + ? WHERE (product_id) = ?", [quant, id]);
+    db.query("UPDATE Products SET product_stock = product_stock + ? WHERE (product_id) = ?",
+    [quant, id]);
   }
   req.session.cart = {};
   res.redirect('/');
-
-
 });
 
 // might need to be change to search for product id instead of name
 app.get('/add-tocart/:id', (req, res) => {
+
   var name_product = req.params.id;
-  console.log(name_product);
   var cart = new Cart(req.session.cart ? req.session.cart : {});
 
   db.query("SELECT * FROM Products WHERE (product_name) = ?",[name_product],
   function(err, rows){
     if(err) throw err;
 
-
     rows.forEach(function(result){
 
       db.query("UPDATE Products SET product_stock = product_stock -1 WHERE (product_id) = ?", [result.product_id]);
       cart.add(result, result.product_id);
       req.session.cart = cart;
-      console.log(req.session.cart);
+      //console.log(req.session.cart);
       res.redirect('/');
-
     });
   });
 });
 
+// Render the edit page for the specific product
 app.get('/edit/:id', (req, res) => {
 
   var name = req.params.id;
@@ -216,12 +217,10 @@ app.get('/edit/:id', (req, res) => {
   db.query("SELECT * FROM Products WHERE product_name = ?", [name],
   function(err, result){
 
-    console.log(result[0]);
-
-    res.render('edit-product',{
+    //console.log(result[0]);
+    res.render('main/edit-product',{
 
       product: result,
-
     });
   });
 });
@@ -239,7 +238,6 @@ app.post('/register', (req, res) => {
   if(errors){
     req.session.errors = errors;
     req.session.success = false;
-
   }
   else {
 
@@ -251,30 +249,28 @@ app.post('/register', (req, res) => {
 
       if(err) throw err;
       console.log("inserted rows: " + result.affectedRows);
-
-  });
-
+    });
 
   db.query("SELECT user_id FROM Users ORDER BY user_id DESC LIMIT 1",
   function(err, result){
     if(err) throw err;
 
-    console.log(Object.values(result[0]));
+    //console.log(Object.values(result[0]));
 
-//    rows.forEach(function(result){
+    rows.forEach(function(result){
       var value = [
         Object.values(result[0])
       ];
       var sql = "INSERT INTO Orders (customer_id) VALUES ?";
       db.query(sql,[value], function(err, result) {
-      if(err) throw err;
+        if(err) throw err;
+        });
+      });
+
+      req.session.success = true;
+      res.redirect('/');
     });
-
-  });
-
-  req.session.success = true;
-  res.redirect('/');
-  }
+  };
 });
 
 app.post('/login', (req, res) => {
@@ -287,12 +283,10 @@ app.post('/login', (req, res) => {
     if (err) throw err;
 
     rows.forEach(function(result){
-
       //console.log(result);
       //console.log(result.user_email);
       if(result.user_email == useremail && result.user_password == password){
         req.session.user = result;
-
       }
       //Check user and password befoe session
       //console.log(req.session.user.user_email, req.session.user.user_password);
@@ -358,17 +352,13 @@ app.post('/cart', (req, res) => {
 
         db.query(sql,[value]);
         db.query("UPDATE Products SET product_stock = product_stock - ? WHERE (product_id) = ?", [count, prodID]);
-        console.log(value);
 
-
-        console.log(req.session.user.user_id);
-
+        //console.log(req.session.user.user_id);
       }
     });
     db.query("INSERT INTO Orders (customer_id) VALUES (?)", [req.session.user.user_id]);
     res.redirect('/empty');
   }
-
 });
 
 app.post('/edit/:id', (req, res) => {
@@ -379,18 +369,13 @@ app.post('/edit/:id', (req, res) => {
   function(err, result){
 
     var productID = result[0].product_id;
-    console.log("heelooo");
+
     db.query("UPDATE Products SET product_name = ?, product_price = ?,product_desc = ?,product_stock = ? WHERE (product_id) = ?",
     [req.body.productName, req.body.productPrice, req.body.productDesc, req.body.productStock,productID]);
 
   });
   res.redirect('/');
 });
-
-
-
-
-
 
 
 app.listen(3000, () => {
