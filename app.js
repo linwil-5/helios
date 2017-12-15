@@ -230,7 +230,7 @@ app.post('/register', (req, res) => {
 
     var sql = "INSERT INTO Users (user_email, user_password, isAdmin) VALUES ?";
     var value = [
-      [req.body.user_email_, req.body.password_, true]
+      [req.body.user_email_, req.body.password_, false]
     ];
     db.query(sql,[value], function(err,result) {
 
@@ -321,7 +321,7 @@ app.post('/cart', (req, res) => {
 	res.redirect('/login');
   }
   else{
-    db.query("SELECT order_id FROM Orders WHERE (customer_id) = ?",[req.session.user.user_id],
+    db.query("SELECT order_id FROM Orders WHERE (customer_id) = ? ORDER BY order_id DESC limit 1",[req.session.user.user_id],
       function(err, result) {
       if (err) throw err;
 
@@ -336,20 +336,24 @@ app.post('/cart', (req, res) => {
         var prodID = products[i].item.product_id;
         var prodPrice = products[i].item.product_price;
 
-        var sql = "INSERT INTO ShoppingBasket (order_id, product_count, product_id, product_price) VALUES ?";
+       var sql = "INSERT INTO ShoppingBasket (order_id, product_count, product_id, product_price) VALUES ?";
         var value = [
           [orderID[0], count, prodID, prodPrice]
-        ];
+       ];
 
         db.query(sql,[value]);
         db.query("UPDATE Products SET product_stock = product_stock - ? WHERE (product_id) = ?", [count, prodID]);
         console.log(value);
 
 
+        console.log(req.session.user.user_id);
+        db.query("INSERT INTO Orders (customer_id) VALUES (?)", [req.session.user.user_id]);
+
       }
     });
     res.redirect('/empty');
   }
+
 });
 
 

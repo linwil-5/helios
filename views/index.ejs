@@ -17,19 +17,21 @@
 				<li><a href="home">Home</a></li>
 				<li><a href="cart">Cart(<%= qty %>)</a></li>
 
-				<%if (!isUserValid) { %>
+				<% if (!isUserValid) { %>
 					<li><a href="login">Login</a></li>
 					<li><a href="register">Register</a></li>
 				<% } %>
 
-				<%if (isUserValid) { %>
+				<% if (isUserValid) { %>
 					<li><a href="logout">Logout</a></li>
 				<% } %>
-				<%if (nameShown == "admin@admin.com") { %>
+				<% if (nameShown == "admin@admin.com") { %>
 					<li><a href="add-product">Add product</a></li>
 					<li><a href="edit-User">Edit User</a></li>
 				<% } %>
-				<li><a href="empty">Empty Cart</a></li>
+				<% if (qty > 0) { %>
+					<li><a href="empty">Empty Cart</a></li>
+				<% } %>
 			</ul>
 		</div>
 	</nav>
