@@ -6,7 +6,13 @@ const session = require('express-session');
 const expressValidator = require('express-validator');
 const MySQLStore = require('express-mysql-session')(session);
 const faker = require('faker');
+
+
 const Cart = require('./models/cart.js');
+const routes = require('./routes/index.js');
+
+
+const router = express.Router();
 
 // Create connection
 const db = mysql.createConnection({
@@ -63,82 +69,10 @@ app.use(session({
   saveUninitialized: false
 }));
 
-// Render the home page
-app.get('/', (req, res) => {
 
-  console.log("SessionId = " +req.sessionID + " UserInf = " +req.session.user);
-//  console.log(req.session.user);
-  req.session.errors = null;
-  req.session.success = null;
-  db.query("SELECT * FROM Products",
-    function(err, rows) { if (err) throw err;
 
-      //Create new or existing session
-      var cart = new Cart(req.session.cart ? req.session.cart : {});
-      req.session.cart = cart;
+app.use('/', routes);
 
-      if(req.session.user == undefined){
-        res.render('index', {
-          title: 'Not logged in',
-          success: req.session.success,
-          errors: req.session.errors,
-          isUserValid: false,
-          products: rows,
-          nameShown: '',
-          qty: req.session.cart.totalQty
-        });
-      }
-      else{
-        res.render('index', {
-          title: 'Welcome Customer!',
-          success: req.session.success,
-          errors: req.session.errors,
-          isUserValid: true,
-          products: rows,
-          nameShown: req.session.user.user_email,
-          qty: req.session.cart.totalQty
-        });
-      }
-    });
-});
-
-// Render the cart page with the session
-app.get('/cart',(req, res) => {
-
-  // Fetch and create at already existing cart
-  var cart = new Cart(req.session.cart);
-  res.render('cart', {
-    title: 'My Cart',
-    products: cart.generateArray(),
-    totalPrice: cart.totalPrice
-  });
-});
-
-// Render the commentpage with the selected product
-app.get('comments:id', (req, res) => {
-  var name_product = req.params.id;
-  console.log(name_product);
-});
-
-// Render admin's edit user page
-app.get('/edit-User', (req, res) => {
-  res.render('main/edit-User');
-});
-
-// Redirect to homepage
-app.get('/home',(req, res) => {
-  res.redirect('/');
-});
-
-// Render the page for user to login
-app.get('/login',(req, res) => {
-  res.render('login');
-});
-
-// Render the page for new user to register
-app.get('/register',(req, res) => {
-  res.render('register');
-});
 
 // Render the page for admin to a a new product? Code possible bad
 app.get('/add-product',(req, res) => {
@@ -158,34 +92,6 @@ app.get('/add-product',(req, res) => {
       }
     });
   });
-});
-
-// Used for redirecting to homepage after user logout
-app.get('/logout', (req, res) => {
-  var cart = new Cart(req.session.cart);
-
-  if(req.session.user != undefined){
-    req.session.destroy();
-  };
-//  return res.status(200);
-  res.redirect('/');
-});
-
-// Used for empty user's cart
-app.get('/empty', (req, res) => {
-
-  var cart = new Cart(req.session.cart);
-  products = cart.generateArray();
-
-  for (var i = 0; i < products.length; i++) {
-    var quant = products[i].qty;
-    var id = products[i].item.product_id;
-
-    db.query("UPDATE Products SET product_stock = product_stock + ? WHERE (product_id) = ?",
-    [quant, id]);
-  }
-  req.session.cart = {};
-  res.redirect('/');
 });
 
 // might need to be change to search for product id instead of name
