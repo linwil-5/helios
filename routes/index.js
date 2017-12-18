@@ -67,6 +67,16 @@ router.get('/', (req, res) => {
 
 // Render the page for new user to register
 router.get('/register',(req, res) => {
+
+  // this means there exists no admin user, lets create one
+  db.query("SELECT * from Users WHERE isAdmin = 1",
+  function(err, result){
+    if(result == undefined){
+      db.query("INSERT Into Users (user_email, user_password, isAdmin) VALUES = ? ",
+        ["admin", "password", true]);
+    }
+  });
+
   res.render('register');
 });
 
