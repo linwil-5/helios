@@ -52,7 +52,7 @@
 														<%if (products[i].product_stock > 0) { %>
 														<a href="add-tocart/<%= products[i].product_name %>">Buy</a>
 														<% } %>
-														<a href="comments/<%= products[i].product_name %>">Comments</a>
+														<a href="comments/<%= products[i].product_id %>">Comments</a>
 														<% if (nameShown == "admin@admin.com") { %>
 															<a href="edit/<%= products[i].product_name %>">Edit</a>
 														<% } %>

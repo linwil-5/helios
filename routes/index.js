@@ -82,9 +82,38 @@ router.get('/register',(req, res) => {
 });
 
 // Render the commentpage with the selected product
-router.get('/comments:id', (req, res) => {
+router.get('/comments/:id', (req, res) => {
   var name_product = req.params.id;
-  console.log(name_product);
+
+  db.query("SELECT * FROM ProductComments WHERE (product_id) = ?",[name_product],
+  function(err, result){
+
+    console.log(result);
+    console.log("iD = " + name_product);
+
+
+    console.log(req.session.user);
+
+    if(req.session.user == undefined){
+      res.render('main/comments',{
+
+        username_comment: "anonymous",
+        title: name_product,
+        allcomments: result,
+        isLoggedIn: false,
+      });
+
+    }
+    else{
+      res.render('main/comments',{
+
+        username_comment: req.session.user.user_email,
+        title: name_product,
+        allcomments: result,
+        isLoggedIn: true,
+      });
+    }
+  });
 });
 
 // Render admin's edit user page

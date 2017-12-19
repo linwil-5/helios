@@ -326,8 +326,25 @@ app.post('/edit/:id', (req, res) => {
   res.redirect('/');
 });
 
-app.post('/cart/update', (req, res) => {
+app.post('/comments/:id', (req, res) => {
+
+  var prodID = req.params.id;
   console.log("Updating......");
+
+  req.checkBody('user_comment', 'Comment text is required');
+
+  console.log(req.session.user.user_id);
+
+  var value = [
+    [req.body.user_comment, req.session.user.user_id, prodID]
+  ];
+  console.log(value);
+  db.query("INSERT INTO ProductComments (comment_text, customer_id, product_id) VALUES ?",
+  [value], function(err, result){
+    if (err) throw err;
+  })
+
+  res.redirect('/comments/'+prodID);
 });
 
 
