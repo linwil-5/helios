@@ -68,15 +68,16 @@ router.get('/', (req, res) => {
 // Render the page for new user to register
 router.get('/register',(req, res) => {
 
+  /*
   // this means there exists no admin user, lets create one
-  db.query("SELECT * from Users WHERE isAdmin = 1",
+  db.query("SELECT user_id from Users WHERE isAdmin = true",
   function(err, result){
-    if(result == undefined){
-      db.query("INSERT Into Users (user_email, user_password, isAdmin) VALUES = ? ",
-        ["admin", "password", true]);
+    //console.log(result);
+    if(result[0] == undefined){
+      db.query("INSERT INTO Users (user_email, user_password, isAdmin) VALUES ('admin@admin.com', 'password', true)");
     }
   });
-
+  */
   res.render('register');
 });
 
@@ -106,10 +107,17 @@ router.get('/cart',(req, res) => {
 
   // Fetch and create at already existing cart
   var cart = new Cart(req.session.cart);
-  res.render('cart', {
-    title: 'My Cart',
-    products: cart.generateArray(),
-    totalPrice: cart.totalPrice
+
+  theproducts = cart.generateArray();
+  db.query("SELECT product_price FROM Products", (err, result) => {
+    //console.log(result[0].product_price);
+    //console.log(theproducts);
+    res.render('cart', {
+      title: 'My Cart',
+      products: cart.generateArray(),
+      totalPrice: cart.totalPrice,
+      databasePrice: result
+    });
   });
 });
 
@@ -148,16 +156,15 @@ router.get('/add-tocart/:id', (req, res) => {
   var cart = new Cart(req.session.cart ? req.session.cart : {});
 
   db.query("SELECT * FROM Products WHERE (product_name) = ?",[name_product],
-  function(err, rows){
-    if(err) throw err;
+  function(err, rows){  if(err) throw err;
 
     rows.forEach(function(result){
 
       db.query("UPDATE Products SET product_stock = product_stock -1 WHERE (product_id) = ?", [result.product_id]);
       cart.add(result, result.product_id);
       req.session.cart = cart;
-      //console.log(req.session.cart);
-      res.redirect('/');
+
+    res.redirect('/');
     });
   });
 });

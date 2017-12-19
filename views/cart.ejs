@@ -29,7 +29,12 @@
 
                             <p>
                               Price: <%= products[i].item.product_price %> $
+
+                              <% if( databasePrice[i].product_price != theproducts[i].item.product_price) { %>
+                                <p><a href="updateprice/<%= products[i].item.product_id %>">Update Price</a></p>
+                              <% } %>
                             </p>
+
                         </div>
                     </div>
                 </div>

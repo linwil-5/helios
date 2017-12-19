@@ -94,6 +94,51 @@ app.get('/add-product',(req, res) => {
   });
 });
 
+
+app.get('/updateprice/:id', (req, res) => {
+
+  var id_product = req.params.id;
+  var cart = new Cart(req.session.cart);
+  theproducts = cart.generateArray()
+
+  db.query("SELECT product_price FROM Products WHERE (product_id) = ?",[id_product], (err, result) => {
+
+    //console.log(id_product);
+    //console.log("result!!");
+    //console.log(cart.items[1].item.product_id);
+
+    cart.items[id_product].item.product_price = result[0].product_price;
+
+    req.session.cart = cart;
+
+  res.redirect('/cart');
+  });
+});
+
+app.get('/orderHistory', (req, res) => {
+
+  db.query("SELECT * FROM Orders", function(err, allOrders){
+
+    db.query("SELECT * FROM ShoppingBasket", function(err, allShopping){
+
+      db.query("SELECT * FROM Users", function(err, allUsers){
+
+
+        res.render('main/order-history', {
+          title: "History",
+          theUsers: allUsers,
+          theShopping: allShopping,
+          theOrders: allOrders,
+
+        });
+
+      });
+    });
+  });
+})
+
+
+
 // might need to be change to search for product id instead of name
 app.get('/add-tocart/:id', (req, res) => {
 
@@ -163,7 +208,6 @@ app.post('/register', (req, res) => {
 
     //console.log(Object.values(result[0]));
 
-    rows.forEach(function(result){
       var value = [
         Object.values(result[0])
       ];
@@ -175,7 +219,6 @@ app.post('/register', (req, res) => {
 
       req.session.success = true;
       res.redirect('/');
-    });
   };
 });
 
@@ -281,6 +324,10 @@ app.post('/edit/:id', (req, res) => {
 
   });
   res.redirect('/');
+});
+
+app.post('/cart/update', (req, res) => {
+  console.log("Updating......");
 });
 
 
