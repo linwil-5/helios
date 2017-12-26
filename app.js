@@ -94,16 +94,18 @@ app.get('/updateprice/:id', (req, res) => {
 
   var id_product = req.params.id;
   var cart = new Cart(req.session.cart);
-  theproducts = cart.generateArray()
 
-  db.query("SELECT product_price FROM Products WHERE (product_id) = ?",[id_product], (err, result) => {
+  db.query("SELECT * FROM Products WHERE (product_id) = ?",[id_product], (err, result) => {
 
-    //console.log(id_product);
-    //console.log("result!!");
-    //console.log(cart.items[1].item.product_id);
+    var newTotalPrice = result[0].product_price * cart.items[id_product].qty;
 
+    console.log("result....");
+    console.log(result);
+
+    cart.items[id_product].item.product_name = result[0].product_name;
+    cart.items[id_product].item.product_desc = result[0].product_desc;
     cart.items[id_product].item.product_price = result[0].product_price;
-
+    cart.items[id_product].price = newTotalPrice;
     req.session.cart = cart;
 
   res.redirect('/cart');
@@ -158,15 +160,16 @@ app.get('/add-tocart/:id', (req, res) => {
 // Render the edit page for the specific product
 app.get('/edit/:id', (req, res) => {
 
-  var name = req.params.id;
+  var theProductID = req.params.id;
 
-  db.query("SELECT * FROM Products WHERE product_name = ?", [name],
+  db.query("SELECT * FROM Products WHERE product_id = ?", [theProductID],
   function(err, result){
 
-    //console.log(result[0]);
     res.render('main/edit-product',{
-
-      product: result,
+      productName: result[0].product_name,
+      productDesc: result[0].product_desc,
+      productStock: result[0].product_stock,
+      productPrice: result[0].product_price,
     });
   });
 });
@@ -181,7 +184,7 @@ app.post('/register', (req, res) => {
 
   var errors = req.validationErrors();
 
-  if(errors){ console.log('hyyyyyyy');
+  if(errors){
     req.session.errors = errors;
     req.session.success = false;
     res.redirect('/error');
@@ -310,15 +313,16 @@ app.post('/cart', (req, res) => {
 
 app.post('/edit/:id', (req, res) => {
 
-  var name = req.params.id;
+  var nameID = req.params.id;
 
-  db.query("SELECT * FROM Products WHERE product_name = ?", [name],
+  db.query("SELECT * FROM Products WHERE product_id = ?", [nameID],
   function(err, result){
-
-    var productID = result[0].product_id;
+    if(err){
+      res.redirect('main/error');
+    }
 
     db.query("UPDATE Products SET product_name = ?, product_price = ?,product_desc = ?,product_stock = ? WHERE (product_id) = ?",
-    [req.body.productName, req.body.productPrice, req.body.productDesc, req.body.productStock,productID]);
+    [req.body.productName, req.body.productPrice, req.body.productDesc, req.body.productStock, nameID]);
 
   });
   res.redirect('/');

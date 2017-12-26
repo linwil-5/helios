@@ -2,23 +2,24 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title><%= product[0].product_name %></title>
+  <title><%= productName %></title>
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
   <body>
     <form method="POST" action"/product/edit">
       <label>The Product Name</label>
-      <input type="text" id="productName" name="productName" value= <%= product[0].product_name %> >
+
+      <input type="text" id="productName" name="productName" value= "<%= productName %> " >
       <br>
       <label>Product Price</label>
-      <input type="text" id="productPrice" name="productPrice" value= <%= product[0].product_price%> >
+      <input type="text" id="productPrice" name="productPrice" value= "<%= productPrice %> ">
       <br>
       <label>Product Description</label>
-      <input type="text" id="productDesc" name="productDesc" size="90" value= <%= product[0].product_desc %> >
+      <input type="text" id="productDesc" name="productDesc" size="90" value= "<%= productDesc %> ">
       <br>
       <label>Number of Products in stock</label>
-      <input type="text" id="productStock" name="productStock" maxlength="5" size="5" value= <%= product[0].product_stock%> >
+      <input type="text" id="productStock" name="productStock" maxlength="5" size="5" value= "<%= productStock %>" >
       <br><br>
       <input type="submit" value="Submit">
       <input type ="reset">

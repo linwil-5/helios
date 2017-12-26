@@ -137,7 +137,6 @@ router.get('/cart',(req, res) => {
   // Fetch and create at already existing cart
   var cart = new Cart(req.session.cart);
 
-  theproducts = cart.generateArray();
   db.query("SELECT product_price FROM Products", (err, result) => {
     //console.log(result[0].product_price);
     //console.log(theproducts);
