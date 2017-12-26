@@ -10,6 +10,8 @@
     <header id="main-header">
       <div class="container">
         <h1>Comments</h1>
+      </div>
+    </header>
 
         <% console.log(allcomments) %>
         <% for (var i = 0; i < allcomments.length; i++) { %>
@@ -24,6 +26,7 @@
       </div>
       <% if (isLoggedIn) { %>
         <div class="container">
+
           <h1>Make Comment</h1>
           <form method="POST" action"/commented">
             <label>Comment as User: <%= username_comment %></label>
@@ -33,7 +36,6 @@
           </form>
         </div>
       <% } %>
-    </header>
 
   </body>
 </html>

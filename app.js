@@ -74,24 +74,19 @@ app.use(session({
 app.use('/', routes);
 
 
-// Render the page for admin to a a new product? Code possible bad
+// Render the add a new product page for admin user
 app.get('/add-product',(req, res) => {
 
-  db.query("SELECT * FROM Users WHERE (user_email) = ?",[req.session.user.user_email],
-    function(err, rows) {
-    if (err) throw err;
-    if(req.session.user.user_email == undefined){
-      res.redirect('/');
+  // Check if there is no user logged in, then if admin then
+  // then the person gets access to the add product page
+  if(req.session.user != undefined){
+    if(req.session.user.isAdmin == true){
+      res.render('main/add-product');
     }
-    rows.forEach(function(result){
-
-      if(result.isAdmin == true) {
-        res.render('main/add-product');
-      }else{
-        res.redirect('/');
-      }
-    });
-  });
+  }
+  else{
+    res.redirect('/');
+  }
 });
 
 
@@ -186,9 +181,10 @@ app.post('/register', (req, res) => {
 
   var errors = req.validationErrors();
 
-  if(errors){
+  if(errors){ console.log('hyyyyyyy');
     req.session.errors = errors;
     req.session.success = false;
+    res.redirect('/error');
   }
   else {
 
@@ -229,7 +225,9 @@ app.post('/login', (req, res) => {
 
   db.query("SELECT * FROM Users WHERE (user_email) = ?",[useremail],
     function(err, rows) {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
 
     rows.forEach(function(result){
       //console.log(result);

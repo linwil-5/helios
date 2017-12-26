@@ -16,7 +16,7 @@
     <section id="showcase">
       <div class="container">
         <div class="row">
-
+            <% var theTotalPrice = 0; %>
             <% for (var i = 0; i < products.length; i++) { %>
                 <div class="col-md-4">
                     <div class="thumbnail">
@@ -38,8 +38,9 @@
                         </div>
                     </div>
                 </div>
+                <% theTotalPrice = theTotalPrice + products[i].price; %>
             <% } %>
-            <h2>Total Price: <%= totalPrice %></h2>
+            <h2>Total Price: <%= theTotalPrice %> $</h2>
               <form method="POST" action"/cart/checkout">
                 <input type="submit" value="Checkout">
               </form>

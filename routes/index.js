@@ -144,7 +144,6 @@ router.get('/cart',(req, res) => {
     res.render('cart', {
       title: 'My Cart',
       products: cart.generateArray(),
-      totalPrice: cart.totalPrice,
       databasePrice: result
     });
   });
@@ -195,6 +194,14 @@ router.get('/add-tocart/:id', (req, res) => {
 
     res.redirect('/');
     });
+  });
+});
+
+
+router.get('/error', (req, res ) => {
+
+  res.render('main/error', {
+    title: "error",
   });
 });
 
