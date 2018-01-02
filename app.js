@@ -157,6 +157,7 @@ app.get('/add-tocart/:id', (req, res) => {
   });
 });
 
+
 // Render the edit page for the specific product
 app.get('/edit/:id', (req, res) => {
 
@@ -173,6 +174,9 @@ app.get('/edit/:id', (req, res) => {
     });
   });
 });
+
+
+
 
 
   // post to mysql databade

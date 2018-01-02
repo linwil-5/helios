@@ -85,14 +85,13 @@ router.get('/register',(req, res) => {
 router.get('/comments/:id', (req, res) => {
   var name_product = req.params.id;
 
+
   db.query("SELECT * FROM ProductComments WHERE (product_id) = ?",[name_product],
   function(err, result){
 
-    console.log(result);
-    console.log("iD = " + name_product);
-
-
-    console.log(req.session.user);
+    //console.log(result);
+    //console.log("iD = " + name_product);
+    //console.log(req.session.user);
 
     if(req.session.user == undefined){
       res.render('main/comments',{
@@ -101,16 +100,42 @@ router.get('/comments/:id', (req, res) => {
         title: name_product,
         allcomments: result,
         isLoggedIn: false,
+        isUserAdmin: false,
+        likedProductYet: true,
+        prodID: name_product,
       });
 
     }
     else{
-      res.render('main/comments',{
+      db.query("SELECT product_id FROM ProductGrades WHERE (customer_id) = ? AND (product_id) = ?", [req.session.user.user_id, name_product],
+      function(err, gradeResult){
+        
+        if(gradeResult[0] == undefined){
 
-        username_comment: req.session.user.user_email,
-        title: name_product,
-        allcomments: result,
-        isLoggedIn: true,
+          res.render('main/comments',{
+
+            username_comment: req.session.user.user_email,
+            title: name_product,
+            allcomments: result,
+            isLoggedIn: true,
+            isUserAdmin: req.session.user.isAdmin,
+            likedProductYet: false,
+            prodID: name_product,
+          });
+        }else{
+
+          res.render('main/comments',{
+
+            username_comment: req.session.user.user_email,
+            title: name_product,
+            allcomments: result,
+            isLoggedIn: true,
+            isUserAdmin: req.session.user.isAdmin,
+            likedProductYet: true,
+            prodID: name_product,
+          });
+        }
+
       });
     }
   });
@@ -196,6 +221,43 @@ router.get('/add-tocart/:id', (req, res) => {
   });
 });
 
+router.get('/comments/delete/:id', (req, res) => {
+
+  var theCommentID = req.params.id;
+
+  db.query("DELETE FROM ProductComments WHERE (comment_id) = ?", [theCommentID]);
+
+  db.query("UPDATE ProductComments SET comment_id = comment_id - 1 WHERE (comment_id) > ?", [theCommentID]);
+
+  db.query("SELECT comment_id FROM ProductComments ORDER BY comment_id DESC LIMIT 1",
+  function(err, result){  if(err) throw err;
+
+    db.query("ALTER TABLE ProductComments AUTO_INCREMENT = ?", [Object.values(result[0])]);
+  });
+
+  res.redirect('/');
+
+});
+
+
+router.get('/comments/like/:id', (req, res) => {
+
+  var prodID = req.params.id;
+
+  var sql = "INSERT INTO ProductGrades (grade_positive, customer_id, product_id) VALUES ?";
+  var value = [
+    [true, req.session.user.user_id, prodID]
+  ];
+  db.query(sql,[value], function(err,result) {
+    if(err){
+      res.redirect('main/error');
+    }
+    console.log("Liked the product ");
+  });
+
+
+  res.redirect('/');
+});
 
 router.get('/error', (req, res ) => {
 

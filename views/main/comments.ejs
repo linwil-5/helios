@@ -13,14 +13,22 @@
       </div>
     </header>
 
-        <% console.log(allcomments) %>
+
+        <% if (!likedProductYet) { %>
+          <a href="like/<%= prodID %>">Like product!</a>
+        <% } %>
+        <% if (likedProductYet) { %>
+          <p>Either you already liked this product or you aren't logged in.</p>
+        <% } %>
         <% for (var i = 0; i < allcomments.length; i++) { %>
 
           <h3>Comment: <%= allcomments[i].comment_text %> <br>
               User:    <%= allcomments[i].customer_id %>
           </h3>
 
-
+          <% if (isUserAdmin) { %>
+            <a href="delete/<%= allcomments[i].comment_id %>">Delete comment</a>
+          <% } %>
 
         <% } %>
       </div>
