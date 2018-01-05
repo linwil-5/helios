@@ -68,16 +68,18 @@ router.get('/', (req, res) => {
 // Render the page for new user to register
 router.get('/register',(req, res) => {
 
-  /*
   // this means there exists no admin user, lets create one
   db.query("SELECT user_id from Users WHERE isAdmin = true",
   function(err, result){
+    if(err){
+      res.render('register');
+    }
     //console.log(result);
     if(result[0] == undefined){
       db.query("INSERT INTO Users (user_email, user_password, isAdmin) VALUES ('admin@admin.com', 'password', true)");
     }
   });
-  */
+
   res.render('register');
 });
 
@@ -109,7 +111,7 @@ router.get('/comments/:id', (req, res) => {
     else{
       db.query("SELECT product_id FROM ProductGrades WHERE (customer_id) = ? AND (product_id) = ?", [req.session.user.user_id, name_product],
       function(err, gradeResult){
-        
+
         if(gradeResult[0] == undefined){
 
           res.render('main/comments',{
